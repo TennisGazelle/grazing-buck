@@ -1,0 +1,59 @@
+# "The Holy Grail" -- a nested conditional allocation strategy that rotates
+# between a handful of leveraged ETFs and a bond fund based on TQQQ's trend
+# and momentum.
+#
+#   IF price(TQQQ) > 200d SMA of TQQQ:
+#       IF 10d RSI of TQQQ > 79%: buy UVXY   else buy TQQQ
+#   ELSE:
+#       IF 10d RSI of TQQQ < 31%: buy TECL
+#       ELSE:
+#           IF 10d RSI of SOXL < 30%: buy SOXL
+#           ELSE:
+#               IF price(TQQQ) < 20d SMA of TQQQ:
+#                   sort {SQQQ, BSV} by 10d RSI, pick the lowest, buy it
+#               ELSE: buy TQQQ
+#
+# Referenced tickers: TQQQ, UVXY, TECL, SOXL, SQQQ, BSV
+name: The Holy Grail
+rebalance: on_trigger
+root:
+  type: if
+  condition: "price(TQQQ) > sma(TQQQ, 200)"
+  then:
+    type: if
+    condition: "rsi(TQQQ, 10) > 79"
+    then:
+      type: asset
+      ticker: UVXY
+    else:
+      type: asset
+      ticker: TQQQ
+  else:
+    type: if
+    condition: "rsi(TQQQ, 10) < 31"
+    then:
+      type: asset
+      ticker: TECL
+    else:
+      type: if
+      condition: "rsi(SOXL, 10) < 30"
+      then:
+        type: asset
+        ticker: SOXL
+      else:
+        type: if
+        condition: "price(TQQQ) < sma(TQQQ, 20)"
+        then:
+          type: sort_select
+          indicator: rsi
+          window: 10
+          order: asc
+          select: 1
+          children:
+            - type: asset
+              ticker: SQQQ
+            - type: asset
+              ticker: BSV
+        else:
+          type: asset
+          ticker: TQQQ

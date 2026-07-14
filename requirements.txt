@@ -1,0 +1,8 @@
+PyYAML>=6.0
+
+# optional, only needed for scripts/fetch_yfinance_data.py:
+# yfinance>=0.2
+# pandas>=2.0
+
+# optional, only needed to run tests:
+# pytest>=7.0
